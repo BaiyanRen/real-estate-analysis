@@ -92,9 +92,27 @@ with col2_3:
                                      options=dates)
 
 
+col3_1, col3_2, col3_3, col3_4, col3_5 = st.beta_columns((3, 1, 1, 1, 1))
+
 with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
     counties = json.load(response)
 
+with col3_1:
+    df = home_data[hometype]
+    color = select_period
+    st.write('**Housing Value Changes (%) in TX in {}**'.format(select_period))
+    st.write('{}'.format(home_label[hometype]))
+    fig = px.choropleth(df, geojson=counties, locations='FIPS', color=color,
+                        color_continuous_scale='fall',
+                        color_continuous_midpoint=0,
+                        scope='usa',
+                        labels={'3ychange': 'Three-year Changes (%)'},
+                        hover_name='CountyName',
+                        hover_data=['2021-01-31'])
+    # zoom the map to show just Texas
+    fig.update_geos(fitbounds='locations')
+    fig.update_layout(coloraxis_colorbar=dict(title='Changes (%)',
+                                              thicknessmode='pixels',
+                                              thickness=15))
 
-
-
+    st.plotly_chart(fig, use_container_width=True)
