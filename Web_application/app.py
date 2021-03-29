@@ -17,7 +17,9 @@ from bokeh.models import GeoJSONDataSource, LinearColorMapper, ColorBar, Numeral
 import os
 import webbrowser
 
+st.set_page_config(layout='wide')
 webbrowser.open('zillowSearchBox.html')
+
 
 
 @st.cache
@@ -101,7 +103,7 @@ def cityFig(df):
     tooltips = [('Zip code', '@Zip'),
                 ('CountyName', '@CountyName')]
 
-    p = figure(plot_width=500, plot_height=300,
+    p = figure(plot_width=580, plot_height=450,
                x_axis_type='mercator', y_axis_type='mercator',
                x_axis_label='Longitude', y_axis_label='Latitude',
                tooltips=tooltips)
@@ -124,14 +126,13 @@ def cityFig(df):
                          label_standoff=15,
                          location=(0, 0))
     p.add_layout(color_bar, 'right')
-    st.bokeh_chart(p, use_container_width=True)
+    st.bokeh_chart(p, use_container_width=False)
 
 
 # Percentage change data in counties visualizaiton function
 def countyFig(period):
     df = home_data[hometype]
     color = period
-    st.write('Housing Value Changes (%) in TX in **{}**'.format(period))
     fig = px.choropleth(df, geojson=counties, locations='FIPS', color=color,
                         color_continuous_scale='fall',
                         color_continuous_midpoint=0,
@@ -141,11 +142,11 @@ def countyFig(period):
     # zoom the map to show just Texas
     fig.update_geos(fitbounds='locations')
     fig.update_layout(coloraxis_colorbar=dict(title='%',
-                                              tickfont=dict(size=10),
+                                              tickfont=dict(size=12),
                                               thicknessmode='pixels',
-                                              thickness=10,
+                                              thickness=20,
                                               lenmode='pixels',
-                                              len=200))
+                                              len=300))
     st.plotly_chart(fig, use_container_width=True)
 
 
@@ -161,37 +162,39 @@ st.write(
 
 st.write('')
 
-col1_1, col1_2 = st.beta_columns((3, 6))
 
-with col1_1:
-    st.write('Home Values Record of: **{}**'.format(selected_date))
+df = city_zhvi[city_zhvi['City'] == selected_city].copy()
+fig = px.line(df, x='Time', y='HomeValue', color='HomeType',
+                  template='simple_white')
+st.plotly_chart(fig, use_container_width=True)
+
+col2_1, col2_2 = st.beta_columns(2)
+
+with col2_1:
+    st.write('Home Values Record of: **{}** in Four Largest Cities'.format(selected_date))
     st.subheader('**Houston**')
     cityFig(houston_data[hometype])
 
-with col1_2:
-    df = city_zhvi[city_zhvi['City'] == selected_city].copy()
-    fig = px.line(df, x='Time', y='HomeValue', color='HomeType',
-                  template='simple_white')
-    st.plotly_chart(fig, use_container_width=True)
-
-col2_1, col2_2, col2_3 = st.beta_columns((3, 3, 3))
-
-with col2_2:
-    countyFig('One year')
-
-    countyFig('Five years')
-
-with col2_3:
-    countyFig('Three years')
-
-    countyFig('Ten years')
-
-with col2_1:
     st.subheader('**Dallas**')
     cityFig(dallas_data[hometype])
 
-    st.subheader('Austin')
+    st.subheader('**Austin**')
     cityFig(austin_data[hometype])
 
-    st.subheader('San Antonio')
+    st.subheader('**San Antonio**')
     cityFig(san_data[hometype])
+
+with col2_2:
+    st.write('Housing Value Changes on the County Level')
+    st.subheader('One Year (2020 - 2021)')
+    countyFig('One year')
+
+    st.subheader('Three Years (2018 - 2021)')
+    countyFig('Three years')
+
+    st.subheader('Five Years (2016 - 2021)')
+    countyFig('Five years')
+
+    st.subheader('Ten Years (2011 - 2021)')
+    countyFig('Ten years')
+
