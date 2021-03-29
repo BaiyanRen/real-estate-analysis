@@ -1,16 +1,35 @@
-# Analysis of Home Values in Texas
+# Streamlit on Heroku
 
-![Houses](https://github.com/BaiyanRen/real-estate-analysis/blob/main/Pictures/breno-assis-r3WAWU5Fi5Q-unsplash.jpeg)
-*Photo by <a href="https://unsplash.com/@brenoassis?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Breno Assis</a> on <a href="/s/photos/house?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>*
+This project is intended to help you tie together some important concepts and
+technologies from the 12-day course, including Git, Streamlit, JSON, Pandas,
+Requests, Heroku, and Bokeh for visualization.
 
-People who left their hometown and built the career in a new city, like me, would start thinking about settling down at some point. Choose a state, a city, a neighbor, then a life. But, when we are talking about home, what are we talking about? Family, warmth, dogs, cats, and of course, the "home" building on the ground. 
+The repository contains a basic template for a Streamlit configuration that will
+work on Heroku.
 
-Home is a special product in our life. Its value is dependent on so many factors, including but not limited to, size, neighbor, building material, interest rate, economy. I divide them into three groups: The first one contains the property of the home itself; the second one contains the features of the local area; the third one contains loan interest rates and economical situations, which exibit global impact on the real estate market. 
+A [finished example](https://streamlit-12day-example.herokuapp.com/) that demonstrates some basic functionality.
 
-The state of Texas locates in the south central part of US. It is the second largest state by area or population, however, its life expense is not high. With the trend of remote working, Texas attracts increasing number of people moving in. The population flow, to some extent, influences the local real-estate market. 
+## Step 1: Setup and deploy
+- Git clone the existing template repository.
+- `Procfile`, `requirements.txt`, and `setup.py` contain some default settings. If you want, you can change the email address in `setup.py` to your own, but it won't affect anything in the app.
 
-Texas is also my future home. It has the same latitude with my hometown, Yunnan. And I love the warm winter.
+- Create Heroku application with `heroku create <app_name>` or leave blank to
+  auto-generate a name.
 
-So, I want to explore the changes in home values in Texas.
+- Deploy to Heroku: `git push heroku master`
+- You should be able to see your site at `https://<app_name>.herokuapp.com`
+- A useful reference is the Heroku [quickstart guide](https://devcenter.heroku.com/articles/getting-started-with-python-o).
 
+## Step 2: Get data from API and put it in pandas
+- Use the `requests` library to grab some data from a public API. This will
+  often be in JSON format, in which case `simplejson` will be useful.
+- Build in some interactivity by having the user submit a form which determines which data is requested.
+- Create a `pandas` dataframe with the data.
 
+## Step 3: Plot pandas data
+- Create an interactive plot from the dataframe. Some recommended libraries: Altair, Bokeh, and Plotly.
+- Altair provides a simple interface for creating linked and layered plots. They can even be exported and embedded in static HTML (and remain fully interactive!) See the [documentation](https://altair-viz.github.io/)
+  and be sure to check out the example gallery.
+- Bokeh can be used in a wide range of applications, from simple charts to extensive dashboards with sophisticated backends. It's the most fully-featured library of these three, but you won't be using it for anything complicated in the Milestone Project. Here you can find the Bokeh [documentation](http://bokeh.pydata.org/en/latest/docs/user_guide/embed.html)
+  and some [examples](https://github.com/bokeh/bokeh/tree/master/examples/embed).
+- Plotly provides a range of APIs in their library. Plotly express, for instance, can be used to create commonly used plots. The Graph Objects API affords more customization, but is more complicated to use. Here is the [documentation](https://plotly.com/python/plotly-express/#gallery) for Plotly Express.
