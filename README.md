@@ -12,3 +12,7 @@ The state of Texas locates in the south central part of US. It is the second lar
 Texas is also my future home. It has the same latitude with my hometown, Yunnan. And I love the warm winter.
 
 So, I want to explore the changes in home values in Texas.
+
+## 1. Visualization of Home Values in TX
+
+I made interactive visualizations and generated a web application by Streamlit and Heroku.
