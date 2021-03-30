@@ -1,5 +1,5 @@
 pandas
-streamlit == 0.57
+streamlit == 0.79.0
 plotly
 python-dotenv
 altair
