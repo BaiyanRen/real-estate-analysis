@@ -60,6 +60,7 @@ city_zhvi = pd.melt(city,
                     id_vars=['HomeType', 'SizeRank', 'City', 'State', 'Metro', 'CountyName'],
                     var_name='Time',
                     value_name='HomeValue')
+city_list = list(city_zhvi['City'][:10])
 
 ## zip level data
 ## select 'dates' to show home values at different zipcode
@@ -81,17 +82,8 @@ homes = county.groupby('HomeType')
 home_label = [label for label, data in homes]
 home_data = [data for label, data in homes]
 
-# widgets
-hometype = st.sidebar.selectbox(label='Select your desired home type:',
-                                options=list(range(len(home_label))),
-                                index=0,
-                                format_func=lambda x: home_label[x])
 
-selected_city = st.sidebar.selectbox(label = 'Select your desired city:',
-                                     options=list(city_zhvi['City']))
 
-selected_date = st.sidebar.select_slider(label='Select the date of record:',
-                                         options=dates)
 
 # monthly data in four cities visualization function
 def cityFig(df):
@@ -162,11 +154,23 @@ st.write(
 
 st.write('')
 
+hometype = st.selectbox(label='Select your desired home type:',
+                                options=list(range(len(home_label))),
+                                index=0,
+                                format_func=lambda x: home_label[x])
+
+selected_city = st.selectbox(label = 'Select your desired city:',
+                                     options=city_list)
+
+
 
 df = city_zhvi[city_zhvi['City'] == selected_city].copy()
 fig = px.line(df, x='Time', y='HomeValue', color='HomeType',
                   template='simple_white')
 st.plotly_chart(fig, use_container_width=True)
+
+selected_date = st.select_slider(label='Select the date of record:',
+                                         options=dates)
 
 col2_1, col2_2 = st.beta_columns(2)
 
