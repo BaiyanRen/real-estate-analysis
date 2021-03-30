@@ -1,7 +1,0 @@
-pandas
-streamlit >= 0.69.2
-plotly
-python-dotenv
-altair
-bokeh
-requests
