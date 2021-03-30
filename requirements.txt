@@ -1,7 +1,7 @@
 pandas
-streamlit == 0.79.0
+streamlit >= 0.69.2
 plotly
 python-dotenv
 altair
-bokeh == 1.4.0
+bokeh
 requests
