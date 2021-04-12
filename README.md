@@ -16,3 +16,11 @@ So, I want to explore the changes in home values in Texas.
 ## 1. Visualization of Home Values in TX
 
 I made interactive visualizations and generated a web application by Streamlit and Heroku, which could be viewed [here](https://capstone-baiyan.herokuapp.com/)
+
+Packages:
+- Plotly
+- Streamlit
+
+## 2. House Price Prediction
+
+I built a LightGBM Regression model to predict house price based on the features of house.
