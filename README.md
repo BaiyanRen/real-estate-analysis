@@ -17,7 +17,7 @@ So, I want to explore the changes in home values in Texas.
 
 I made interactive visualizations and generated a web application by Streamlit and Heroku, which could be viewed [here](https://capstone-baiyan.herokuapp.com/)
 
-Data source: [Zillow Housing Data](https://www.zillow.com/research/data/)
+Data source: [Zillow Housing Data](https://www.zillow.com/research/data/).
 
 
 Packages:
