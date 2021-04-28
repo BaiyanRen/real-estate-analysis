@@ -32,6 +32,7 @@ county = load_data(
     'https://raw.githubusercontent.com/BaiyanRen/real-estate-analysis/main/processed_data/tx_county_zhvi.csv')
 city = load_data(
     'https://raw.githubusercontent.com/BaiyanRen/real-estate-analysis/main/processed_data/tx_city_zhvi.csv')
+
 houston_zip = load_data(
     'https://raw.githubusercontent.com/BaiyanRen/real-estate-analysis/main/processed_data/houston_zip_zhvi.csv')
 dallas_zip = load_data(
@@ -40,11 +41,12 @@ austin_zip = load_data(
     'https://raw.githubusercontent.com/BaiyanRen/real-estate-analysis/main/processed_data/austin_zip_zhvi.csv')
 san_antonion_zip = load_data(
     'https://raw.githubusercontent.com/BaiyanRen/real-estate-analysis/main/processed_data/san_antonio_zip_zhvi.csv')
+
 with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
     counties = json.load(response)
 # Pre-process data
 ## Convert 'HomeType' to ordered categorical variable
-for df in [county, city, houston_zip, dallas_zip, austin_zip, san_antonion_zip]:
+for df in [county, city]:
     df['HomeType'] = pd.Categorical(df['HomeType'], ordered=True,
                                     categories=['Condominium and Co-operative Homes',
                                                 'Single-family Residences',
@@ -62,6 +64,7 @@ city_zhvi = pd.melt(city,
 ## select the top 10 largest cities as the list
 city_list = list(city_zhvi['City'][:10])
 
+
 ## zip level data
 ## select 'hometype'
 houston = houston_zip.groupby('HomeType')
@@ -75,16 +78,17 @@ san_data = [data for label, data in san_antonion]
 
 ## County level data
 ## select 'hometype' in select box
-## then select dates to show home value changes
+## then select dates to show home value and home value changes
 homes = county.groupby('HomeType')
 home_label = [label for label, data in homes]
-home_data = [data for label, data in homes]
+county_data = [data for label, data in homes]
 
 dates = county.columns.tolist()[6:]
 
 
 # Percentage change data in counties visualizaiton function
-def countyFig(date1, date2):
+
+def countyPctFig(date1, date2):
     # Calculate percentage change between date2 and date1
     pct = 100 * (county[date2] - county[date1]) / county[date1]
     pct_ = pct.to_frame()
@@ -116,13 +120,91 @@ def countyFig(date1, date2):
     p.update_layout(coloraxis_colorbar=dict(title='%',
                                             tickfont=dict(size=12),
                                             thicknessmode='pixels',
-                                            thickness=20,
+                                            thickness=10,
                                             lenmode='pixels',
                                             len=300))
     st.plotly_chart(p, use_container_width=True)
 
+def countyPctFig_budget(date1, date2):
+    # Calculate percentage change between date2 and date1
+    pct = 100 * (county[date2] - county[date1]) / county[date1]
+    pct_ = pct.to_frame()
+    pct_.rename(columns={0: 'change'}, inplace=True)
+    df_pct = pd.merge(county[['FIPS', 'HomeType', 'CountyName', 'Metro', date1, date2]],
+                      pct_,
+                      left_index=True,
+                      right_index=True)
 
+    changes = df_pct.groupby('HomeType')
+    change = [data for label, data in changes]
+
+    df_ = change[hometype]
+    df_final = df_[df_[date2] < budget]
+    color = 'change'
+    p = px.choropleth(df_final, geojson=counties, locations='FIPS', color=color,
+                      color_continuous_scale='fall',
+                      color_continuous_midpoint=0,
+                      scope='usa',
+                      hover_name='CountyName',
+                      hover_data={'Metro': True,
+                                  date1: ':$,.0f',
+                                  date2: ':$,.0f',
+                                  'Percentage change': (':.2%', df_final['change'] / 100),
+                                  'FIPS': False,
+                                  'change': False}
+                      )
+    # zoom the map to show just Texas
+    p.update_geos(fitbounds='locations')
+    p.update_layout(coloraxis_colorbar=dict(title='%',
+                                            tickfont=dict(size=12),
+                                            thicknessmode='pixels',
+                                            thickness=10,
+                                            lenmode='pixels',
+                                            len=300))
+    st.plotly_chart(p, use_container_width=True)
+
+def countyFig(date2):
+    df_county = county_data[hometype]
+    color = date2
+    p = px.choropleth(df_county, geojson=counties, locations='FIPS', color=color,
+                      color_continuous_scale='Inferno',
+                      scope='usa',
+                      hover_name='CountyName',
+                      hover_data={'Metro': True,
+                                  date2: ':$,.0f',
+                                  'FIPS': False}
+                      )
+    p.update_geos(fitbounds='locations')
+    p.update_layout(coloraxis_colorbar=dict(title='$',
+                                            tickfont=dict(size=12),
+                                            thicknessmode='pixels',
+                                            thickness=10,
+                                            lenmode='pixels',
+                                            len=300))
+    st.plotly_chart(p, use_container_width=True)
+
+def countyFig_budget(date2):
+    df_county = county_data[hometype]
+    df_county_final = df_county[df_county[date2] < budget]
+    color = date2
+    p = px.choropleth(df_county_final, geojson=counties, locations='FIPS', color=color,
+                      color_continuous_scale='Inferno',
+                      scope='usa',
+                      hover_name='CountyName',
+                      hover_data={'Metro': True,
+                                  date2: ':$,.0f',
+                                  'FIPS': False}
+                      )
+    p.update_geos(fitbounds='locations')
+    p.update_layout(coloraxis_colorbar=dict(title='$',
+                                            tickfont=dict(size=12),
+                                            thicknessmode='pixels',
+                                            thickness=10,
+                                            lenmode='pixels',
+                                            len=300))
+    st.plotly_chart(p, use_container_width=True)
 # monthly data in four cities visualization function
+
 def cityFig(df):
     tile_provider = get_provider(Vendors.CARTODBPOSITRON_RETINA)
     source = ColumnDataSource(data=df)
@@ -158,36 +240,94 @@ def cityFig(df):
     st.bokeh_chart(p, use_container_width=True)
 
 
-st.title('Home Values in Texas')
+row1_1, row1_2 = st.beta_columns((1, 1))
+
+with row1_1:
+    st.title('Analysis of Real-estate Market in Texas')
+
+with row1_2:
+    st.markdown(
+        '''
+        
+            Assessing how home values change over time in the State of Texas and at its major cities.
+            
+            By selecting the home type and sliding the time, you can explore the house values of your desired home 
+            filtered by your budget. 
+            
+            Home values are based on Zillow Home Value Index from [Zillow Housing Data](https://www.zillow.com/research/data/)
+            
+        '''
+    )
 
 st.write(
     '''
-        Assessing how home values change over time in the State of Texas and at its major cities.
-        
-        By selecting the home type and sliding the time, you can explore the house values in your desired future home.
+
     '''
 )
 
-st.write('')
+
 
 hometype = st.selectbox(label='Select your desired home type:',
                         options=list(range(len(home_label))),
-                        index=0,
+                        index=4,
                         format_func=lambda x: home_label[x])
 
-date1 = st.select_slider(label='Start:',
+date1 = st.select_slider(label='From:',
                          options=dates,
-                         value='2020-01-31')
-date2 = st.select_slider(label='End',
+                         value='2011-01-31')
+
+date2 = st.select_slider(label='To:',
                          options=dates,
                          value='2021-01-31')
 
-countyFig(date1, date2)
+row2_1, row2_2 = st.beta_columns((1, 1))
+
+with row2_1:
+    st.subheader('Percentage Changes in Values of {}.'.format(home_label[hometype]))
+    st.write('from {} to {}.'.format(date1, date2))
+
+    countyPctFig(date1, date2)
+
+with row2_2:
+    st.subheader('Values of {}'.format(home_label[hometype]))
+    st.write('on {}'.format(date2))
+
+    countyFig(date2)
+
+budget = st.number_input(label='Your Budget ($):',
+                         min_value=50000,
+                         value=300000,
+                         step=10000,
+                         format='%g')
+
+st.subheader('With budget of ${:,}'.format(budget))
+
+row3_1, row3_2 = st.beta_columns((1, 1))
+
+with row3_1:
+    st.subheader('Percentage Changes in Values of {}.'.format(home_label[hometype]))
+    st.write('from {} to {}.'.format(date1, date2))
+
+    countyPctFig_budget(date1, date2)
+
+with row3_2:
+    st.subheader('Values of {}'.format(home_label[hometype]))
+    st.write('on {}'.format(date2))
+
+    countyFig_budget(date2)
 
 selected_city = st.selectbox(label='Select your desired city:',
                              options=city_list)
 
+st.write('Changes in Home Values in {}.'.format(selected_city))
+
 df = city_zhvi[city_zhvi['City'] == selected_city].copy()
 fig = px.line(df, x='Time', y='HomeValue', color='HomeType',
-              template='simple_white')
+              template='simple_white',
+              labels={
+                  'HomeValue': 'Home Values',
+                  'HomeType': 'Home Types'},
+              hover_name='Time',
+              hover_data={'HomeValue': ':$,.0f'}
+              )
 st.plotly_chart(fig, use_container_width=True)
