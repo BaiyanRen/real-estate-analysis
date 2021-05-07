@@ -265,12 +265,19 @@ st.write(
     '''
 )
 
+col1, col2 = st.beta_columns(2)
 
-
-hometype = st.selectbox(label='Select your desired home type:',
-                        options=list(range(len(home_label))),
-                        index=4,
-                        format_func=lambda x: home_label[x])
+with col1:
+    hometype = st.selectbox(label='Select your desired home type:',
+                            options=list(range(len(home_label))),
+                            index=4,
+                            format_func=lambda x: home_label[x])
+with col2:
+    budget = st.number_input(label='Your Budget ($):',
+                             min_value=50000,
+                             value=300000,
+                             step=10000,
+                             format='%g')
 
 date1 = st.select_slider(label='From:',
                          options=dates,
@@ -283,35 +290,31 @@ date2 = st.select_slider(label='To:',
 row2_1, row2_2 = st.beta_columns((1, 1))
 
 with row2_1:
-    st.subheader('Percentage Changes in Values of {}.'.format(home_label[hometype]))
+    st.subheader('Return on Investment of {}'.format(home_label[hometype]))
     st.write('from {} to {}.'.format(date1, date2))
 
     countyPctFig(date1, date2)
 
 with row2_2:
-    st.subheader('Values of {}'.format(home_label[hometype]))
+    st.subheader('Home Values of {}'.format(home_label[hometype]))
     st.write('on {}'.format(date2))
 
     countyFig(date2)
 
-budget = st.number_input(label='Your Budget ($):',
-                         min_value=50000,
-                         value=300000,
-                         step=10000,
-                         format='%g')
+
 
 st.subheader('With budget of ${:,}'.format(budget))
 
 row3_1, row3_2 = st.beta_columns((1, 1))
 
 with row3_1:
-    st.subheader('Percentage Changes in Values of {}.'.format(home_label[hometype]))
+    st.subheader('Return on Investment of {}'.format(home_label[hometype]))
     st.write('from {} to {}.'.format(date1, date2))
 
     countyPctFig_budget(date1, date2)
 
 with row3_2:
-    st.subheader('Values of {}'.format(home_label[hometype]))
+    st.subheader('Home Values of {}'.format(home_label[hometype]))
     st.write('on {}'.format(date2))
 
     countyFig_budget(date2)
@@ -323,11 +326,14 @@ st.write('Changes in Home Values in {}.'.format(selected_city))
 
 df = city_zhvi[city_zhvi['City'] == selected_city].copy()
 fig = px.line(df, x='Time', y='HomeValue', color='HomeType',
+              color_discrete_sequence=px.colors.qualitative.Set2,
               template='simple_white',
-              labels={
-                  'HomeValue': 'Home Values',
-                  'HomeType': 'Home Types'},
+              labels={'HomeValue': 'Home Values',
+                      'HomeType': 'Home Types'},
               hover_name='Time',
               hover_data={'HomeValue': ':$,.0f'}
               )
+fig.update_layout(paper_bgcolor='rgba(0, 0, 0, 0)', # rgba color: (red, green, blue, alpha)
+                  plot_bgcolor='rgba(0, 0, 0, 0)')
+
 st.plotly_chart(fig, use_container_width=True)
