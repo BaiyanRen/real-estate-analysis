@@ -1,19 +1,17 @@
-# Analysis of Home Values in Seattle
+# Web-based Prediction Model of Home Values in Seattle
 
 ![Houses](https://github.com/BaiyanRen/real-estate-analysis/blob/main/Pictures/breno-assis-r3WAWU5Fi5Q-unsplash.jpeg)
 *Photo by <a href="https://unsplash.com/@brenoassis?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Breno Assis</a> on <a href="/s/photos/house?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>*
 
-People who left their hometown and built the career in a new city, like me, would start thinking about settling down at some point. Choose a state, a city, a neighbor, then a life. But, when we are talking about home, what are we talking about? Family, warmth, dogs, cats, and of course, the "house" made by bricks and woods. 
+With the increasing inflation rate and historical low mortgage rate, real estate becomes a popular choice for investment. Among the big cities in US, Seattle is one with high potential. 
 
-Home is a special product in our life. Its value is dependent on so many factors, including but not limited to, size, neighbor, building material, interest rate, economy. I divide them into three groups: The first one contains the property of the home itself; the second one contains the features of the local area; the third one contains loan interest rates and economical situations, which exibit global impact on the real estate market. 
-
-Seattle is a city with dynamic. It is also a good place for real estate investment. To help investors distinguish opportunities with high potential, I incoporated data visualization and machine learning into a web application, on which users could explore the general conditions of real estate market in Seattle, and acquire the estimated price of their home-of-interest. The comparison of the estimated price and the listing price would be informative and useful for investors before they making the decision.
+To help house buyers distinguish opportunities with high potential, and house sellers estimate the value of their house by themselves, I built a web-based prediction model of home values in Seattle. I incoporated data visualization and machine learning into a web application, on which users could explore the general conditions of real estate market in Seattle, and acquire the estimated price of a specific house. 
 
 The product consists of two parts:
 
 ## 1. Visualization of Home Values in Seattle
 
-I made interactive visualizations and generated a web application by Streamlit and Heroku, which could be viewed [here](https://capstone-baiyan.herokuapp.com/)
+I made interactive visualizations and generated a web application by Streamlit and Heroku, which could be accessed [here](https://capstone-baiyan.herokuapp.com/)
 
 Data source: [Zillow Housing Data](https://www.zillow.com/research/data/).
 
