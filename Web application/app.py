@@ -1,27 +1,118 @@
 import streamlit as st
-import numpy as np
+import streamlit.components.v1 as components
+
 import pandas as pd
-from urllib.request import urlopen
-import json
+
 # visualization
 import plotly.express as px
 # machine learning
 import pickle
-import xgboost as xgb
 st.set_page_config(layout='wide')
 
 
+# Functions
 @st.cache
 def load_data(csv):
+    '''
+    Load csv into dataframe
+    '''
     df = pd.read_csv(csv)
     return df
 
+@st.cache
+def zipmap(df, date, mapbox_token):
+    '''
+    Visualize the home values on the map on the zip code level
+    '''
+
+    df1 = df[hometype]
+    px.set_mapbox_access_token(mapbox_token)
+    fig = px.scatter_mapbox(df1, lat='Latitude', lon='Longitude', color=df1[date],
+                            hover_name='Zip',
+                            hover_data={'Latitude': False,
+                                        'Longitude': False,
+                                        '2021-01-31': ':$,.0f',
+                                        'City': True
+                                        },
+                            zoom=8,
+                            color_continuous_scale=px.colors.sequential.Turbo,
+                            mapbox_style='basic')
+    fig.update_traces(marker=dict(size=15,
+                                  opacity=.8),
+                      selector=dict(type='scattermapbox'))
+    fig.update_layout(coloraxis_colorbar=dict(title='$',
+                                              thicknessmode='pixels',
+                                              thickness=15,
+                                              lenmode='pixels',
+                                              len=300))
+
+    return fig
+
+@st.cache
+def Lineplot(df, zip):
+    '''
+    Visualize the home values change with time
+    '''
+    df1 = df[df['Zip'] == zip].copy()
+    fig = px.line(df1, x='Time', y='HomeValues', color='HomeType',
+                  color_discrete_sequence=px.colors.qualitative.Set2,
+                  template='simple_white',
+                  labels={'HomeValues': 'Home Values',
+                          'HomeType': 'Home Types'},
+                  hover_name='Time',
+                  hover_data={'HomeValues': ':$,.0f'}
+                  )
+
+    fig.update_layout(paper_bgcolor='rgba(0, 0, 0, 0)',  # rgba color: (red, green, blue, alpha)
+                      plot_bgcolor='rgba(0, 0, 0, 0)')
+
+    fig.update_layout(legend=dict(yanchor="top",
+                                  y=0.99,
+                                  xanchor="left",
+                                  x=0.01
+                                  ))
+    return fig
+
+def df_inputs():
+    '''
+    show user inputs in a dataframe
+    '''
+    data = {'bedooms': bedrooms,
+            'bathrooms': bathrooms,
+            'sqft_living': livingarea,
+            'sqft_log': lotarea,
+            'floors': floors,
+            'waterfront': waterfront,
+            'view': view,
+            'condition': condition,
+            'grade': grade,
+            'sqft_above': sqft_above,
+            'sqft_basement': sqft_basement,
+            'yr_built': yr_built,
+            'yr_renovated': yr_renovated,
+            'zipcode': zipcode,
+            'lat': lat,
+            'long': long,
+            'sqft_living15': sqft_living15,
+            'sqft_lot15': sqft_lot15,
+            '30_FRM': frm_30,
+            '15_FRM': frm_15}
+
+    features = pd.DataFrame(data, index=['input'])
+    return features
 
 # Load data
 king = load_data(
     'https://raw.githubusercontent.com/BaiyanRen/real-estate-analysis/main/processed_data/king_zip_zhvi.csv')
 
-# Pre-process data
+# Load estimator
+estimator = pickle.load(open('estimator.sav', 'rb'))
+
+# Load mapbox access token
+with open('secret.txt', 'r') as f:
+    mapbox_token = f.read()
+
+# Preprocessing
 ## melt to make lineplot
 king_time = pd.melt(king,
                     id_vars=['HomeType', 'Latitude', 'Longitude', 'Zip', 'State', 'City', 'Metro', 'CountyName'],
@@ -46,108 +137,8 @@ yes_no = ['No', 'Yes']
 conditions = ['Very Poor', 'Poor', 'Average', 'Good', 'Excellent']
 
 
-## Plotting functions
-def Lineplot(df, zip):
-    df1 = df[df['Zip'] == zip].copy()
-    fig = px.line(df1, x='Time', y='HomeValues', color='HomeType',
-                  color_discrete_sequence=px.colors.qualitative.Set2,
-                  template='simple_white',
-                  labels={'HomeValues': 'Home Values',
-                          'HomeType': 'Home Types'},
-                  hover_name='Time',
-                  hover_data={'HomeValues': ':$,.0f'}
-                  )
 
-    fig.update_layout(paper_bgcolor='rgba(0, 0, 0, 0)',  # rgba color: (red, green, blue, alpha)
-                      plot_bgcolor='rgba(0, 0, 0, 0)')
-
-    fig.update_layout(legend=dict(yanchor="top",
-                                  y=0.99,
-                                  xanchor="left",
-                                  x=0.01
-                                  ))
-    return fig
-
-
-@st.cache
-def zipmap(df, date):
-    df1 = df[hometype]
-    px.set_mapbox_access_token(
-        'pk.eyJ1IjoiYmFpeWFucmVuIiwiYSI6ImNrbTV3amFsZDBpaDMydXFiNjRwNTEyZTMifQ.ti6dUHMEzzlzG3rNGoFhTA')
-    fig = px.scatter_mapbox(df1, lat='Latitude', lon='Longitude', color=df1[date],
-                            hover_name='Zip',
-                            hover_data={'Latitude': False,
-                                        'Longitude': False,
-                                        '2021-01-31': ':$,.0f',
-                                        'City': True
-                                        },
-                            zoom=8,
-                            color_continuous_scale=px.colors.sequential.Turbo,
-                            mapbox_style='basic')
-    fig.update_traces(marker=dict(size=15,
-                                  opacity=.8),
-                      selector=dict(type='scattermapbox'))
-    fig.update_layout(coloraxis_colorbar=dict(title='$',
-                                              thicknessmode='pixels',
-                                              thickness=15,
-                                              lenmode='pixels',
-                                              len=300))
-
-    return fig
-
-
-@st.cache
-def zipmap_budget(df, date, budget):
-    df1 = df[hometype]
-    df2 = df1[df1[date] < budget]
-    px.set_mapbox_access_token(
-        'pk.eyJ1IjoiYmFpeWFucmVuIiwiYSI6ImNrbTV3amFsZDBpaDMydXFiNjRwNTEyZTMifQ.ti6dUHMEzzlzG3rNGoFhTA')
-    fig = px.scatter_mapbox(df2, lat='Latitude', lon='Longitude', color=df2[date],
-                            hover_name='Zip',
-                            hover_data={'Latitude': False,
-                                        'Longitude': False,
-                                        '2021-01-31': ':$,.0f',
-                                        'City': True
-                                        },
-                            zoom=8,
-                            color_continuous_scale=px.colors.sequential.Turbo,
-                            mapbox_style='basic')
-    fig.update_traces(marker=dict(size=15,
-                                  opacity=.8),
-                      selector=dict(type='scattermapbox'))
-    fig.update_layout(coloraxis_colorbar=dict(title='$',
-                                              thicknessmode='pixels',
-                                              thickness=15,
-                                              lenmode='pixels',
-                                              len=300))
-    return fig
-
-## show dataframe containing user input features
-def df_inputs():
-    data = {'bedooms': bedrooms,
-            'bathrooms': bathrooms,
-            'sqft_living': livingarea,
-            'sqft_log': lotarea,
-            'floors': floors,
-            'waterfront': waterfront,
-            'view': view,
-            'condition': condition,
-            'grade': grade,
-            'sqft_above': sqft_above,
-            'sqft_basement': sqft_basement,
-            'yr_built': yr_built,
-            'yr_renovated': yr_renovated,
-            'zipcode': zipcode,
-            'lat': lat,
-            'long': long,
-            'sqft_living15': sqft_living15,
-            'sqft_lot15': sqft_lot15,
-            '30_FRM': frm_30,
-            '15_FRM': frm_15}
-
-    features = pd.DataFrame(data, index=['input'])
-    return features
-# Web
+# Web page
 
 # Sidebar - overview of Real-estate market
 st.sidebar.subheader('Overview')
@@ -161,11 +152,6 @@ date = st.sidebar.select_slider(label='Select the date',
                                 options=dates,
                                 value='2021-03-31')
 
-budget = st.sidebar.number_input(label='Your Budget ($):',
-                                 min_value=100000,
-                                 value=600000,
-                                 step=10000,
-                                 format='%g')
 
 selected_zip = st.sidebar.selectbox(label='Select the zip code:',
                                     options=zip_list)
@@ -244,56 +230,39 @@ frm_15 = st.sidebar.number_input(label='15-Year Fixed Mortgage Rates (%)',
                                  step=0.01)
 
 
-estimator = pickle.load(open('estimator.sav', 'rb'))
-
-
-
-
-
-
 # Main page
-row1_1, row1_2 = st.beta_columns((1, 1))
 
-with row1_1:
-    st.title('Analysis of Real-estate Market in Seattle')
+st.title('Find Homes in Seattle')
 
-with row1_2:
-    st.markdown(
-        '''
-        
-            Assessing Real Estate Investment in Seattle.
-            
-            By selecting the house type and sliding the time, you can explore the home values at different zip codes and
-            filter it by your budget. 
-            
-            Home values are based on Zillow Home Value Index from [Zillow Housing Data](https://www.zillow.com/research/data/)
-            
-        '''
-    )
-
-st.write(
-    '''
-
-    '''
-)
 
 # Visualizations
 
 st.subheader('Home Values of {}'.format(home_label[hometype]))
 st.write('on {}'.format(date))
-
-fig2 = zipmap(home_data, date)
+fig2 = zipmap(home_data, date, mapbox_token)
 st.plotly_chart(fig2, use_container_width=True)
-
-st.subheader('With budget of ${:,}'.format(budget))
-
-fig3 = zipmap_budget(home_data, date, budget)
-st.plotly_chart(fig3, use_container_width=True)
 
 st.subheader('Changes in Home Values in {}.'.format(selected_zip))
 
 fig1 = Lineplot(king_time, selected_zip)
 st.plotly_chart(fig1, use_container_width=True)
+
+# Searching homes
+
+components.html(
+    '''
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Find Homes</title>
+    </head>
+    <body>
+        <div id="zillow-large-search-box-widget-container" style="width:432px;overflow:hidden;background-color:#e7f1fd;color:#555; font: normal normal normal 13px verdana,arial,sans-serif;line-height:13px;margin:0 auto;padding:0;text-align:center;border:1px solid #adcfff;letter-spacing:0;text-transform:none;"><h2 style="color:#d61;text-align:left;font-size:20px;line-height:20px;font-weight:normal;float:left;width:200px;margin-left:10px;margin-top:5px;letter-spacing:0;text-transform:none;">Find Homes</h2><div style="float:right;"><a href="https://www.zillow.com/" target="_blank" rel="nofollow"><img alt="Zillow Real Estate Information" style="border:0;" src="https://www.zillow.com/widgets/GetVersionedResource.htm?path=/static/images/powered-by-zillow.gif"></img></a></div><iframe scrolling="no" src="https://www.zillow.com/widgets/search/LargeSearchBoxWidget.htm?did=zillow-large-search-box-iframe-widget&type=iframe&rgname=Seattle+WA&shvi=yes" width="430" frameborder="0" height="400"></iframe><table id="zillow-tnc-widget-footer-links" width="100%" style="font: normal normal normal 10px verdana,arial,sans-serif;text-align:left;line-height:12px;margin:10px 5px;padding:0;border-spacing:0;border-collapse:collapse;"><tbody style="margin:0;padding:0;"><tr style="margin:0;padding:0;"><td style="font-weight:bold;font-size:10px;color:#555;text-align:left;margin:0;padding:0;">QUICK LINKS:</td></tr><tr style="margin:0;padding:0;"><td style="margin:0;padding:0;"><span id="widgetFooterLink" class="regionBasedLink"><a href="https://www.zillow.com/seattle-wa/" target="_blank" rel="nofollow" style="color:#36b;font-family:verdana,arial,sans-serif;font-size:10px;margin:0 5px 0 0;padding:0;text-decoration:none;"><span class="region">Seattle</span> Real Estate Listing</a></span></td><td style="margin:0;padding:0;"><span id="widgetFooterLink"><a href="https://www.zillow.com/mortgage-rates/" target="_blank" rel="nofollow" style="color:#36b;font-family:verdana,arial,sans-serif;font-size:10px;margin:0 5px 0 0;padding:0;text-decoration:none;">Mortgage Rates</a></span></td><td style="margin:0;padding:0;"><span id="widgetFooterLink"><a href="https://www.zillow.com/refinance/" target="_blank" rel="nofollow" style="color:#36b;font-family:verdana,arial,sans-serif;font-size:10px;margin:0 5px 0 0;padding:0;text-decoration:none;">Refinancing</a></span></td></tr><tr style="margin:0;padding:0;"><td style="margin:0;padding:0;"><span id="widgetFooterLink" class="regionBasedLink"><a href="https://www.zillow.com/seattle-wa/foreclosures/" target="_blank" rel="nofollow" style="color:#36b;font-size:10px;margin:0 5px 0 0;padding:0;text-decoration:none;"><span class="region">Seattle</span> Foreclosures</a></span></td><td style="margin:0;padding:0;"><span id="widgetFooterLink"><a href="https://www.zillow.com/mortgage-calculator/" target="_blank" rel="nofollow" style="color:#36b;font-size:10px;margin:0 5px 0 0;padding:0;text-decoration:none;">Mortgage Calculators</a></span></td><td style="margin:0;padding:0;"><span id="widgetFooterLink"><a href="https://www.zillow.com/mortgage-rates/" target="_blank" rel="nofollow" style="color:#36b;font-size:10px;margin:0 5px 0 0;padding:0;text-decoration:none;">Purchase Loans</a></span></td></tr></tbody></table></div>
+    </body>
+''',
+    height=600)
+
+# Prediction
 
 st.subheader('User Input Features')
 inputs = df_inputs()
