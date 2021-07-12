@@ -103,7 +103,7 @@ def df_inputs():
 
 # Load data
 king = load_data(
-    'https://raw.githubusercontent.com/BaiyanRen/real-estate-analysis/main/processed_data/king_zip_zhvi.csv')
+    'https://raw.githubusercontent.com/BaiyanRen/real-estate-analysis/main/Datasets/king_zip_zhvi.csv')
 
 # Load estimator
 estimator = pickle.load(open('estimator.sav', 'rb'))
