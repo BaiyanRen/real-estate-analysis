@@ -11,7 +11,7 @@ The product consists of two parts:
 
 ## 1. Visualization of Home Values in Seattle
 
-I made interactive visualizations and generated a web application by Streamlit and Heroku, which could be accessed [here](https://capstone-baiyan.herokuapp.com/)
+I made interactive visualizations and generated a web application by Streamlit and Heroku:[click here](https://capstone-baiyan.herokuapp.com/)
 
 Data source: [Zillow Housing Data](https://www.zillow.com/research/data/).
 
