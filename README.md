@@ -1,4 +1,4 @@
-# Web-based Prediction Model of Home Values in Seattle
+# Web-based Prediction Model of Real-estate market in Seattle
 
 ![Houses](https://github.com/BaiyanRen/real-estate-analysis/blob/main/Pictures/breno-assis-r3WAWU5Fi5Q-unsplash.jpeg)
 *Photo by <a href="https://unsplash.com/@brenoassis?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Breno Assis</a> on <a href="/s/photos/house?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>*
@@ -13,18 +13,23 @@ The product consists of two parts:
 
 I made interactive visualizations and generated a web application by Streamlit and Heroku:[click here](https://capstone-baiyan.herokuapp.com/)
 
-Data source: [Zillow Housing Data](https://www.zillow.com/research/data/).
+Data source: 
+- [Zillow Housing Data](https://www.zillow.com/research/data/).
+- [Kaggle House Sales in King County Dataset](https://www.kaggle.com/harlfoxem/housesalesprediction)
 
-
-Packages:
+Data Visualization Packages:
 - Plotly
 - Streamlit
 
 ## 2. House Price Prediction
 
-I built a LightGBM Regression model to predict house price based on the features of house.
+I built a XGBoost Regression model to predict house price based on the features of house and mortgage rate.
 
-Data source: [Kaggle competition](https://www.kaggle.com/c/house-prices-advanced-regression-techniques) (House Prices - Advanced Regression Techniques) using the [Ames Home Dataset](http://jse.amstat.org/v19n3/decock.pdf)
+Data source: 
+- [Kaggle House Sales in King County Dataset](https://www.kaggle.com/harlfoxem/housesalesprediction)
+
+Machine Learning Packages:
+- XGBoost
 
 
-(I am currently updating and incoporating the house price prediction model into the web app.)
+
