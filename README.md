@@ -28,7 +28,8 @@ Data source:
 - [Kaggle House Sales in King County Dataset](https://www.kaggle.com/harlfoxem/housesalesprediction)
 
 Machine Learning Packages:
-- XGBoost
+- [XGBoost](https://xgboost.readthedocs.io/en/latest/index.html)
+- [Hyperopt](http://hyperopt.github.io/hyperopt/)
 
 
 
