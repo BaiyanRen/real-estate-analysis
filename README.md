@@ -14,8 +14,7 @@ The product consists of two parts:
 I made interactive visualizations and generated a web application by Streamlit and Heroku:[click here](https://capstone-baiyan.herokuapp.com/)
 
 Data source: 
-- [Zillow Housing Data](https://www.zillow.com/research/data/).
-- [Kaggle House Sales in King County Dataset](https://www.kaggle.com/harlfoxem/housesalesprediction)
+- [Zillow Housing Data](https://www.zillow.com/research/data/)
 
 Data Visualization Packages:
 - Plotly
