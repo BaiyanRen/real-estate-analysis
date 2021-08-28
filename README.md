@@ -31,5 +31,5 @@ Machine Learning Packages:
 - [XGBoost](https://xgboost.readthedocs.io/en/latest/index.html)
 - [Hyperopt](http://hyperopt.github.io/hyperopt/)
 
-
+This model predicts the house price with percentage error as 11%.
 
